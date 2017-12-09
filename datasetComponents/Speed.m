@@ -93,11 +93,11 @@ classdef Speed < handle
                 if inputIsFront
                     data = this.removeOutliers(this.getRawFrontLeft());
                 else
-                    data = this.removeOutliers(this.getRawFrontRight());
+                    data = this.removeOutliers(this.getRawRearLeft());
                 end
             else
                 if inputIsFront
-                    data = this.removeOutliers(this.getRawRearLeft());
+                    data = this.removeOutliers(this.getRawFrontRight());
                 else
                     data = this.removeOutliers(this.getRawRearRight());
                 end
