@@ -126,7 +126,7 @@ classdef Dampers < handle
             finishMed = median(data(finishRange));
             diffDamp = startMed - finishMed;
             rpm = this.dataset.originalData.RPM;
-            diffDampPerRPM = diffDamp / sum(rpm(runInterval(1):runInterval(2)))
+            diffDampPerRPM = diffDamp / sum(rpm(runInterval(1):runInterval(2)));
         end
     end
     
