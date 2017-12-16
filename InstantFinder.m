@@ -11,6 +11,7 @@ classdef InstantFinder < handle
         ZERO_ACCELERATION_TOLERANCE = 0.1; %g
         ZERO_SPEED_TOLERANCE = 3; %km/h
         F_SAMPLING;
+        ACCELERATION_DISTANCE = 75;
         filter;
     end
     
@@ -29,12 +30,38 @@ classdef InstantFinder < handle
             else
                 start = (possibleStarts);
             end
+            if isempty(start)
+                start = (1);
+            end
         end
         
         function possibleStarts = getPossibleStarts(this)
             peaks = this.getStartPeaks();
             possibleStarts = this.evaluatePossibleStarts(peaks);
         end
+        
+        function movingStart = getMovingStart(this)
+            startSample = this.getStart();
+            speed = this.dataset.getSpeed();
+            forward = find((speed(startSample:end)) > 0);
+            movingStart = forward(1) + startSample;
+        end
+        
+        function accelerationTime = getAccelerationTime(this)
+            movingStart = this.getMovingStart();
+            accelerationEnd = this.getAccelerationEnd();
+            accelerationTime = (accelerationEnd - movingStart) / this.dataset.F_SAMPLING;
+        end
+        
+        function accelerationEnd = getAccelerationEnd(this)
+            startSample = this.getStart();
+            speed = this.dataset.getSpeed();
+            usefulSamples = speed(startSample:end);
+            space = cumtrapz(usefulSamples ./ (3.6 * this.dataset.F_SAMPLING));
+            endSample = find(space > this.ACCELERATION_DISTANCE);
+            accelerationEnd = endSample(1) + startSample;           
+        end
+        
     end
     
     methods (Access = private)

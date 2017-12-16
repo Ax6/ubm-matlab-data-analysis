@@ -31,8 +31,10 @@ classdef Dataset < handle
             this.tEnd = this.getDuration();
             this.generate();
             this.filter = IMUFilter();
-             import Dampers.*
+            import Dampers.*
             this.dampers = Dampers(this);
+            import Speed.*
+            this.speed = Speed(this);
         end
         function data = getData(this)
             interval = this.dataInterval;
@@ -54,6 +56,7 @@ classdef Dataset < handle
         function tStart = getStartTime(this)
             tStart = this.tStart;
         end
+        
         function setStartTime(this, startTime)
             this.tStart = startTime;
             if this.tStart < 0
@@ -61,6 +64,7 @@ classdef Dataset < handle
             end
             this.generate();
         end
+        
         function setEndTime(this, endTime)
             this.tEnd = endTime;
             if this.tEnd > this.getDuration()
@@ -68,9 +72,11 @@ classdef Dataset < handle
             end
             this.generate();
         end
+        
         function setStartSamples(this, startSamples)
             this.setStartTime(startSamples / this.F_SAMPLING);
-        end      
+        end
+        
         function setEndSamples(this, endSamples)
              this.setEndTime(endSamples ./ this.F_SAMPLING);
         end
@@ -141,13 +147,11 @@ classdef Dataset < handle
         function this = generate(this)
             import Accelerometer.*
             import Gyroscope.*
-            import Speed.*
             import SteeringAngle.*
             import Brakes.*
             import RideHeight.*
             this.accelerometer = Accelerometer(this);
             this.gyroscope = Gyroscope(this);
-            this.speed = Speed(this);
             this.steeringAngle = SteeringAngle(this);
             this.brakes = Brakes(this);
             this.temperatures = Temperatures(this);
