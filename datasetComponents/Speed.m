@@ -9,6 +9,10 @@ classdef Speed < handle
         rearLeft;
         rearRight;
         filter;
+        frontLeftFiltered;
+        frontRightFiltered;
+        rearLeftFiltered;
+        rearRightFiltered;
     end
     
     methods (Access = public)
@@ -32,16 +36,28 @@ classdef Speed < handle
             rawSpeed = [this.frontLeft, this.frontRight, this.rearLeft, this.rearRight];
         end
         function frontLeft = getFrontLeft(this)
-            frontLeft = this.getFiltered(this.frontLeft, 1, 1);
+            if isempty(this.frontLeftFiltered)
+                this.frontLeftFiltered = this.getFiltered(this.frontLeft, 1, 1);
+            end
+            frontLeft = this.frontLeftFiltered(this.dataset.getDataRange());
         end
         function frontRight = getFrontRight(this)
-            frontRight = this.getFiltered(this.frontRight, 0, 1);
+            if isempty(this.frontRightFiltered)
+                this.frontRightFiltered = this.getFiltered(this.frontRight, 0, 1);
+            end
+            frontRight = this.frontRightFiltered(this.dataset.getDataRange());
         end
         function rearLeft = getRearLeft(this)
-            rearLeft = this.getFiltered(this.rearLeft, 1, 0);
+            if isempty(this.rearLeftFiltered)
+                this.rearLeftFiltered = this.getFiltered(this.rearLeft, 1, 0);
+            end
+            rearLeft = this.rearLeftFiltered(this.dataset.getDataRange());
         end
         function rearRight = getRearRight(this)
-            rearRight = this.getFiltered(this.rearRight, 0, 0);
+            if isempty(this.rearRightFiltered)
+                this.rearRightFiltered = this.getFiltered(this.rearRight, 0, 0);
+            end
+            rearRight = this.rearRightFiltered(this.dataset.getDataRange());
         end
         function rawFrontLeft = getRawFrontLeft(this)
             rawFrontLeft = this.frontLeft(this.dataset.getDataRange());
