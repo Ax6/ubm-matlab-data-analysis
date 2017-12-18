@@ -37,6 +37,7 @@ classdef Dampers < handle
                 this.dataset.originalData.DamperRR = [];
             end
             if(ismember('DamperFLmm', this.dataset.getData().Properties.VariableNames))
+                this.dataset.VCUResample({'DamperFLmm','DamperFRmm','DamperRLmm','DamperRRmm'});
                 this.frontLeft = this.dataset.getOriginalData().DamperFLmm;
                 this.frontRight = this.dataset.getOriginalData().DamperFRmm;
                 this.rearLeft = this.dataset.getOriginalData().DamperRLmm;
@@ -222,7 +223,8 @@ classdef Dampers < handle
     diffDamp = diff(data.*100);
     diffDamp(end+1) = diffDamp(end);
     absDiffDamp = abs(diffDamp);
-    absDiffDampFilt = medfilt1(absDiffDamp, 1000);  
+    absDiffDampFilt = medfilt1(absDiffDamp, 1000);
+    %absDiffDampFilt = this.dataset.getSpeed();
     t = this.dataset.getTimeAxis();
     %plot(t, absDiffDampFilt);
     %hold on

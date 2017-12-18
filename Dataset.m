@@ -20,6 +20,12 @@ classdef Dataset < handle
         F_SAMPLING = 100;
         tStart;
         tEnd;
+        VCU_ECU_SYNC_ENABLED = true;
+        VCULength;
+        ECULength;
+        VCUCoeff;
+        ECUCoeff;
+        VCUTurnOnOffset = 15;
     end
     
     methods (Access = public)
@@ -27,14 +33,17 @@ classdef Dataset < handle
             %DATASET Construct an instance of this class
             import IMUFilter.*
             this.originalData = originalData;
+            this.genECUVCUSyncCoefficents();
+            this.VCUResample({'ClutchPosPneum','Gear'});
+            this.originalData.Gear = round(this.originalData.Gear);
             this.tStart = 0;
             this.tEnd = this.getDuration();
             this.generate();
             this.filter = IMUFilter();
-            import Dampers.*
-            this.dampers = Dampers(this);
             import Speed.*
             this.speed = Speed(this);
+            import Dampers.*
+            this.dampers = Dampers(this);
         end
         function data = getData(this)
             interval = this.dataInterval;
@@ -124,9 +133,44 @@ classdef Dataset < handle
             interval = this.getDataInterval();
             dataRange = interval(1):interval(2);
         end
+        function this = VCUResample(this, variables)
+            if ~this.VCU_ECU_SYNC_ENABLED
+                return
+            end
+            arrayData = table2array(this.originalData(:,variables));
+            resampled = this.getVCUResampled(arrayData);
+        	this.originalData(:,variables) = array2table(resampled);
+        end
+        function resampled = getVCUResampled(this, data)
+            if length(data) < this.VCULength + this.VCUTurnOnOffset
+                data = [data; zeros(this.VCULength + this.VCUTurnOnOffset - length(data), size(data, 2))];
+            end
+            data = data(this.VCUTurnOnOffset:(this.VCULength + this.VCUTurnOnOffset),:);
+            rightSignal = resample(data, this.ECUCoeff, this.VCUCoeff);
+            if length(rightSignal) < this.ECULength
+               %Correct in case coefficients proporsion affects array size
+               rightSignal(end+1,:) = rightSignal(end,:);
+            end
+            resampled = rightSignal(1:this.ECULength, :);
+        end
     end
     
     methods (Access = private)
+        function this = genECUVCUSyncCoefficents(this)
+            % We suppose that ECU is time correct. (lol)
+            vcuSignal = this.originalData.PbrakeFrontBar;
+            dVcuSignal = diff(vcuSignal);
+            indexes = find(dVcuSignal < 0);
+            shutdown = indexes(end);
+            this.VCULength = shutdown;
+            this.ECULength = length(vcuSignal);
+            this.VCUCoeff = this.VCULength;
+            this.ECUCoeff = this.ECULength;
+            if this.ECUCoeff * this.VCUCoeff > 2^31 %Maximum working parameters
+                this.ECUCoeff = floor(sqrt(2^31 * (this.ECUCoeff / this.VCUCoeff)));
+                this.VCUCoeff = floor(2^31 / this.ECUCoeff);
+            end
+        end
         function dataInterval = getDataInterval(this)
             dataInterval = floor((this.getTimeInterval() .* this.F_SAMPLING) + 1);
         end

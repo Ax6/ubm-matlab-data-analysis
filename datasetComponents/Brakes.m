@@ -22,6 +22,7 @@ classdef Brakes
             this.filter = IMUFilter();
             this.filter.MEDIAN_WINDOW = this.MEDIAN_WINDOW;
             if(ismember('PbrakeFrontBar', this.dataset.getData().Properties.VariableNames))
+                this.dataset.VCUResample({'PbrakeFrontBar','PbrakeFrontBar'});
                 this.pFront = this.dataset.getData().PbrakeFrontBar;
                 this.pRear = this.dataset.getData().PbrakeRearBar;
             end

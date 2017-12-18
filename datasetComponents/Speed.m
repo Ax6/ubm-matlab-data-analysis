@@ -21,6 +21,7 @@ classdef Speed < handle
             
             this.dataset = dataset;
             if(ismember('SpeedFLKmh', this.dataset.getData().Properties.VariableNames))
+                this.dataset.VCUResample({'SpeedFLKmh','SpeedFRKmh','SpeedRLKmh','SpeedRRKmh'});
                 this.frontLeft = this.dataset.getData().SpeedFLKmh;
                 this.frontRight = this.dataset.getData().SpeedFRKmh;
                 this.rearLeft = this.dataset.getData().SpeedRLKmh;

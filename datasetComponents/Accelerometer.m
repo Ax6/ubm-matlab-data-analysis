@@ -19,6 +19,7 @@ classdef Accelerometer < handle
             this.filter = IMUFilter();
             this.filter.setType(this.filterType);
             if(ismember('AccXg', this.dataset.getData().Properties.VariableNames))
+                this.dataset.VCUResample({'AccXg','AccYg','AccZg'});
                 this.X = this.dataset.getData().AccXg;
                 this.Y = this.dataset.getData().AccYg;
                 this.Z = this.dataset.getData().AccZg;
