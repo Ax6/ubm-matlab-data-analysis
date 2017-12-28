@@ -21,11 +21,12 @@ classdef Dataset < handle
         tStart;
         tEnd;
         VCU_ECU_SYNC_ENABLED = true;
+        VCU_ECU_SYNCED = false;
         VCULength;
         ECULength;
         VCUCoeff;
         ECUCoeff;
-        VCUTurnOnOffset = 15;
+        VCUTurnOnOffset = 1;
     end
     
     methods (Access = public)
@@ -33,9 +34,7 @@ classdef Dataset < handle
             %DATASET Construct an instance of this class
             import IMUFilter.*
             this.originalData = originalData;
-            this.genECUVCUSyncCoefficents();
-            this.VCUResample({'ClutchPosPneum','Gear'});
-            this.originalData.Gear = round(this.originalData.Gear);
+            this.ECUVCUSyinc();
             this.tStart = 0;
             this.tEnd = this.getDuration();
             this.generate();
@@ -44,6 +43,19 @@ classdef Dataset < handle
             this.speed = Speed(this);
             import Dampers.*
             this.dampers = Dampers(this);
+        end
+        function this = ECUVCUSyinc(this)
+            if this.canSyncECUVCU()
+                this.genECUVCUSyncCoefficents();
+                if ismember('ClutchPosPneum', this.originalData.Properties.VariableNames)
+                    this.VCUResample({'ClutchPosPneum'});
+                end
+                if ismember('Gear', this.originalData.Properties.VariableNames)
+                    this.VCUResample({'Gear'});
+                    this.originalData.Gear = round(this.originalData.Gear);
+                end
+                this.VCU_ECU_SYNCED = true;
+            end
         end
         function data = getData(this)
             interval = this.dataInterval;
@@ -134,7 +146,7 @@ classdef Dataset < handle
             dataRange = interval(1):interval(2);
         end
         function this = VCUResample(this, variables)
-            if ~this.VCU_ECU_SYNC_ENABLED
+            if ~this.VCU_ECU_SYNC_ENABLED || ~this.VCU_ECU_SYNCED
                 return
             end
             arrayData = table2array(this.originalData(:,variables));
@@ -156,6 +168,9 @@ classdef Dataset < handle
     end
     
     methods (Access = private)
+        function flag = canSyncECUVCU(this)
+           flag = ismember('PbrakeFrontBar', this.originalData.Properties.VariableNames);
+        end
         function this = genECUVCUSyncCoefficents(this)
             % We suppose that ECU is time correct. (lol)
             vcuSignal = this.originalData.PbrakeFrontBar;
