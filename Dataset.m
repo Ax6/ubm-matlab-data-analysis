@@ -20,7 +20,7 @@ classdef Dataset < handle
         F_SAMPLING = 100;
         tStart;
         tEnd;
-        VCU_ECU_SYNC_ENABLED = true;
+        VCU_ECU_SYNC_ENABLED = false;
         VCU_ECU_SYNCED = false;
         VCULength;
         ECULength;
@@ -30,11 +30,16 @@ classdef Dataset < handle
     end
     
     methods (Access = public)
-        function this = Dataset(originalData)
+        function this = Dataset(originalData, vcu_ecu_sync_enable)
             %DATASET Construct an instance of this class
             import IMUFilter.*
             this.originalData = originalData;
-            this.ECUVCUSyinc();
+            if exist('vcu_ecu_sync_enable', 'var')
+                this.VCU_ECU_SYNC_ENABLED = vcu_ecu_sync_enable;
+            end
+            if this.VCU_ECU_SYNC_ENABLED
+                this.ECUVCUSyinc();
+            end
             this.tStart = 0;
             this.tEnd = this.getDuration();
             this.generate();

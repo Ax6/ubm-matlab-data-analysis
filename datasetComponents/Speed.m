@@ -91,7 +91,7 @@ classdef Speed < handle
         function filtData = getFiltered(this, data, isLeft, isFront)
             filtered = this.removeOutliers(data);
             workingIntervals = this.getWorkingIntervals(filtered);
-            calcLeft = this.calcOnWheelOpposite(isLeft, isFront);
+            calcLeft = this.calcOnWheelOpposite(~isLeft, isFront);
             filtered(workingIntervals == 0) = calcLeft(workingIntervals == 0);
             filtData = medfilt1(filtered, 11);
         end
