@@ -1,5 +1,5 @@
 classdef Acquisition < handle
-    
+
     properties (Access = private)
         dataset,
         instantFinder,
@@ -11,11 +11,13 @@ classdef Acquisition < handle
     end
     
     methods (Access = public)
-        function this = Acquisition(fileName)
+        function this = Acquisition(fileName, log_source)
+            if ~exist('log_source', 'var')
+                log_source = this.LOG_SOURCE_DEFAULT;
+            end
             this.name = fileName;
-            loadedData = load(fileName);
             import Dataset.*
-            this.dataset = Dataset(loadedData.ECU);
+            this.dataset = Dataset(this.loadData(log_source));
             import InstantFinder.*
             this.instantFinder = InstantFinder(this.dataset);
         end
@@ -52,7 +54,78 @@ classdef Acquisition < handle
     end
     
     methods (Access = private)
+        function loadedData = loadData(this, log_source)
+            import LogsManager.*
+            if log_source == LogsManager.LOG_SOURCE_DEFAULT
+                loadedData = this.loadDefault();
+            elseif log_source == LogsManager.LOG_SOURCE_INCA
+                loadedData = this.loadInca();
+            else
+                throw(MException('Acquisition:invalidSource', 'Log source not valid'));
+            end
+        end
 
+        function data = loadDefault(this)
+            raw_data = load(this.name);
+            data = raw_data.ECU;
+        end
+
+        function data = loadInca(this)
+            incaFiles = this.readIncaFiles();
+            biggest = 0;
+            for i=1:length(incaFiles)
+                if(incaFiles{i}.Samples > biggest)
+                    table = incaFiles{i};
+                    biggest = incaFiles{i}.Samples;
+                end
+            end
+
+            %for i=1:length(incaFiles)
+            %    file = incaFiles{i};
+            %    if(file.Samples < biggest)
+            %        data = file.Data;
+            %        for c=1:length(data)
+            %        incaFiles{i}.Time
+            %    end
+            %end
+            
+            data = table.Data;
+        end
+
+        function incaFiles = readIncaFiles(this)
+            i = 1;
+            tableList = {};
+            fileName = this.genIncaName(i);
+            while (exist(fileName, 'file') == 2)
+                fileText = fileread(fileName);
+
+                tokens = regexp(fileText, 'Group_[0-9]+=\s\[\s*((\s|.)*)\];', 'tokens');
+                groupText = strrep(tokens{1}{1}, ';', '');
+                dataMatrix = strread(groupText);
+
+                tokens = regexp(fileText, '(\S+)\s*=\s*([0-9]+)\s*;', 'tokens');
+
+                T = table;
+
+                for p = 2:length(tokens)
+                    varName = strrep(tokens{p}{1}, 'qiXCPqj1', '');
+                    T{:, varName} = dataMatrix(:,str2num(tokens{p}{2}));
+                end
+
+                tableList{i} = {};
+                tableList{i}.Name = fileName;
+                tableList{i}.Samples = str2num(tokens{1}{2});
+                tableList{i}.Data = T;
+
+                i = i + 1;
+                fileName = this.genIncaName(i);
+            end
+            incaFiles = tableList;
+        end
+
+        function name = genIncaName(this, i)
+            name = strcat(this.name, '_', int2str(i), '.m');
+        end
     end
 end
 

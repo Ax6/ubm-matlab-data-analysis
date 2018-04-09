@@ -20,7 +20,7 @@ classdef Dataset < handle
         F_SAMPLING = 100;
         tStart;
         tEnd;
-        VCU_ECU_SYNC_ENABLED = false;
+        VCU_ECU_SYNC_ENABLED = true;
         VCU_ECU_SYNCED = false;
         VCULength;
         ECULength;
@@ -62,12 +62,20 @@ classdef Dataset < handle
                 this.VCU_ECU_SYNCED = true;
             end
         end
-        function data = getData(this)
+        function data = getData(this, variable)
             interval = this.dataInterval;
             if ~this.dataInterval
                 interval = this.getDataInterval();
             end
-            data = this.originalData(interval(1):interval(2),:);
+            if exist('variable', 'var')
+                if ismember(variable, this.originalData.Properties.VariableNames)
+                    data = this.originalData{interval(1):interval(2), {variable}};
+                else
+                    throw(MException('Dataset:VariableNotFound', 'Cannot find variable "%s" in dataset.', variable))
+                end
+            else
+                data = this.originalData(interval(1):interval(2),:);
+            end
         end
         function data = getOriginalData(this)
             data = this.originalData;

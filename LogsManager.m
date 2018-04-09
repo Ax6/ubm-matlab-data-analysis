@@ -9,6 +9,11 @@ classdef LogsManager < handle
         selectedLogs = struct('dates',{{}},'locations',{{}},'specialities',{{}},'drivers',{{}},'attempts',{{}});
         selectedVariables = {};
     end
+
+    properties (Constant)
+        LOG_SOURCE_DEFAULT = 0;
+        LOG_SOURCE_INCA = 1;
+    end
     
     methods
         function this = LogsManager(inputDirectory)
@@ -59,10 +64,15 @@ classdef LogsManager < handle
             dataset = Dataset(originalData);
         end
         
-        function acquisition = getAcquisition(this, name)
-            if this.fileExist(name)
-                acquisition = Acquisition(name);
+        function acquisition = getAcquisition(this, name, log_source)
+            if ~exist('log_source', 'var')
+                log_source = this.LOG_SOURCE_DEFAULT;
             end
+            %if this.fileExist(name)
+                acquisition = Acquisition(name, log_source);
+            %else
+            %    throw(MException('LogsManager:AcquistionNotFound', 'Acquistion "%s" not found.', name)) 
+            %end
         end
         
         function acquisition = getRandomAcquisition(this)
@@ -75,7 +85,7 @@ classdef LogsManager < handle
             if isempty(this.selectedVariables)
                 data = originalData;
             else
-                data = originalData(1:end,this.getExistingSelectedVariables(originalData));
+                data = originalData(1:end, this.getExistingSelectedVariables(originalData));
             end
         end
         function existingVariables = getExistingSelectedVariables(this, data)
@@ -146,4 +156,3 @@ classdef LogsManager < handle
         end
     end
 end
-
