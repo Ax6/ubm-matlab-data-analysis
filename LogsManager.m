@@ -11,8 +11,9 @@ classdef LogsManager < handle
     end
 
     properties (Constant)
-        LOG_SOURCE_DEFAULT = 0;
-        LOG_SOURCE_INCA = 1;
+        SOURCE_DEFAULT = 0;
+        SOURCE_INCA = 1;
+        SOURCE_LABVIEW = 2;
     end
     
     methods
@@ -66,13 +67,13 @@ classdef LogsManager < handle
         
         function acquisition = getAcquisition(this, name, log_source)
             if ~exist('log_source', 'var')
-                log_source = this.LOG_SOURCE_DEFAULT;
+                log_source = this.SOURCE_DEFAULT;
             end
-            %if this.fileExist(name)
+            if this.fileExist(name)
                 acquisition = Acquisition(name, log_source);
-            %else
-            %    throw(MException('LogsManager:AcquistionNotFound', 'Acquistion "%s" not found.', name)) 
-            %end
+            else
+                throw(MException('LogsManager:AcquistionNotFound', 'Acquistion "%s" not found.', name)) 
+            end
         end
         
         function acquisition = getRandomAcquisition(this)

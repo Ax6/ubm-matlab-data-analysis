@@ -13,7 +13,7 @@ classdef Acquisition < handle
     methods (Access = public)
         function this = Acquisition(fileName, log_source)
             if ~exist('log_source', 'var')
-                log_source = this.LOG_SOURCE_DEFAULT;
+                log_source = this.SOURCE_DEFAULT;
             end
             this.name = fileName;
             import Dataset.*
@@ -56,10 +56,12 @@ classdef Acquisition < handle
     methods (Access = private)
         function loadedData = loadData(this, log_source)
             import LogsManager.*
-            if log_source == LogsManager.LOG_SOURCE_DEFAULT
+            if log_source == LogsManager.SOURCE_DEFAULT
                 loadedData = this.loadDefault();
-            elseif log_source == LogsManager.LOG_SOURCE_INCA
+            elseif log_source == LogsManager.SOURCE_INCA
                 loadedData = this.loadInca();
+            elseif log_source == LogsManager.SOURCE_LABVIEW
+                loadedData = this.loadLabview();
             else
                 throw(MException('Acquisition:invalidSource', 'Log source not valid'));
             end
@@ -70,7 +72,31 @@ classdef Acquisition < handle
             data = raw_data.ECU;
         end
 
+        function data = loadLabview(this)
+            raw_data = load(this.name);
+            labview_data = raw_data.ConvertedData.Data.MeasuredData;
+            data = table();
+            samples_count = 0;
+            for i=1:length(labview_data)
+                if labview_data(i).Total_Samples > samples_count
+                    samples_count = labview_data(i).Total_Samples;
+                end
+            end
+            for i=1:length(labview_data)
+                if labview_data(i).Total_Samples == samples_count
+                    originalString = labview_data(i).Name;
+                    cleanedString = regexprep(originalString, '\s*\[.*\]', ''); % Removing unit of measure
+                    exploded = strsplit(cleanedString, '/');
+                    name = exploded(end);
+                    name = regexprep(name, ' ', '_');
+                    data{:, name} = labview_data(i).Data;
+                end
+            end
+        end
+
         function data = loadInca(this)
+            %Current limitation for Inca
+            %Only group with maximum number of samples gets imported
             incaFiles = this.readIncaFiles();
             biggest = 0;
             for i=1:length(incaFiles)
@@ -79,15 +105,6 @@ classdef Acquisition < handle
                     biggest = incaFiles{i}.Samples;
                 end
             end
-
-            %for i=1:length(incaFiles)
-            %    file = incaFiles{i};
-            %    if(file.Samples < biggest)
-            %        data = file.Data;
-            %        for c=1:length(data)
-            %        incaFiles{i}.Time
-            %    end
-            %end
             
             data = table.Data;
         end
