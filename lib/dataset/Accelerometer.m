@@ -14,9 +14,9 @@ classdef Accelerometer < handle
     methods (Access = public)
         function this = Accelerometer(dataset)
             %ACCELEROMETER Construct an instance of this class
-            import IMUFilter.*
+            import SwissFilter.*
             this.dataset = dataset;
-            this.filter = IMUFilter();
+            this.filter = SwissFilter();
             this.filter.setType(this.filterType);
             if(ismember('AccXg', this.dataset.getData().Properties.VariableNames))
                 this.dataset.VCUResample({'AccXg','AccYg','AccZg'});

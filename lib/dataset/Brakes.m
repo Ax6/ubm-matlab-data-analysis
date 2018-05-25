@@ -17,12 +17,12 @@ classdef Brakes
         function this = Brakes(dataset)
             %BRAKE Construct an instance of this class
             %   Detailed explanation goes here
-            import IMUFilter.*
+            import SwissFilter.*
             this.dataset = dataset;
-            this.filter = IMUFilter();
+            this.filter = SwissFilter();
             this.filter.MEDIAN_WINDOW = this.MEDIAN_WINDOW;
             if(ismember('PbrakeFrontBar', this.dataset.getData().Properties.VariableNames))
-                this.dataset.VCUResample({'PbrakeFrontBar','PbrakeFrontBar'});
+                this.dataset.VCUResample({'PbrakeFrontBar','PbrakeRearBar'});
                 this.pFront = this.dataset.getData().PbrakeFrontBar;
                 this.pRear = this.dataset.getData().PbrakeRearBar;
             end

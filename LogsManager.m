@@ -24,14 +24,17 @@ classdef LogsManager < handle
             if(exist('inputDirectory', 'var'))
                 directory = inputDirectory;
             end
-            
             addpath(directory);
-            this.fileList = dir(strcat(directory, this.LOG_NAME_SEARCH));
-            this.fileCount = length(this.fileList);
-            this.generateRandomFileExtraction();
+            this.loadFiles(directory);
             fprintf('Log manager loaded, found: %i log files ', this.fileCount);
         end
         
+        function this = loadFiles(this, directory)
+            this.fileList = dir(strcat(directory, this.LOG_NAME_SEARCH));
+            this.fileCount = length(this.fileList);
+            this.generateRandomFileExtraction();
+        end
+
         function this = setDates(this, dates)
             this.selectedLogs.dates = dates;
         end
@@ -64,12 +67,13 @@ classdef LogsManager < handle
             end
             dataset = Dataset(originalData);
         end
-        
+
         function acquisition = getAcquisition(this, name, log_source)
             if ~exist('log_source', 'var')
                 log_source = this.SOURCE_DEFAULT;
             end
             if this.fileExist(name)
+
                 acquisition = Acquisition(name, log_source);
             else
                 throw(MException('LogsManager:AcquistionNotFound', 'Acquistion "%s" not found.', name)) 
@@ -78,9 +82,10 @@ classdef LogsManager < handle
         
         function acquisition = getRandomAcquisition(this)
             extracted = this.randomExtracted(this.randomExtractedIndex);
-            acquisition = this.getAcquisition(this.getFileName(extracted));
+            acquisition = this.getAcquisition(this.fileList(extracted).name);
             this.assignNextRandomIndex();
         end
+
         function data = getSelectedData(this, logName)
             originalData = this.getAcquisition(logName).getDataset().getOriginalData();
             if isempty(this.selectedVariables)
@@ -89,6 +94,7 @@ classdef LogsManager < handle
                 data = originalData(1:end, this.getExistingSelectedVariables(originalData));
             end
         end
+
         function existingVariables = getExistingSelectedVariables(this, data)
             existingVariables = {};
             for i = 1:length(this.selectedVariables)
@@ -97,6 +103,7 @@ classdef LogsManager < handle
                 end
             end
         end
+        
         function selected = getSelectedLogNames(this)
             regex = this.buildSelectionRegexp();
             matches = {};
@@ -112,18 +119,18 @@ classdef LogsManager < handle
     
     methods (Access = private)
         function exists = fileExist(this, name)
+            exists = isstruct(this.getFile(name));
+        end
+        function file = getFile(this, name)
             matName = strcat(name, '.mat');
             for i = 1:this.fileCount
-                loadedName = this.getFileName(i);
+                loadedName = this.fileList(i).name;
                 if strcmp(loadedName, name) || strcmp(loadedName, matName)
-                    exists = true;
+                    file = this.fileList(i);
                     return;
                 end
             end
-            exists = false;
-        end
-        function name = getFileName(this, fileIndex)
-            name = this.fileList(fileIndex).name;
+            file = false;
         end
         function this = generateRandomFileExtraction(this)
             this.randomExtracted = randperm(this.fileCount);

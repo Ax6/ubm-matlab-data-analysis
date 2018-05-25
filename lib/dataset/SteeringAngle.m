@@ -16,8 +16,8 @@ classdef SteeringAngle
             %STEERINGANGLE Construct an instance of this class
             this.dataset = dataset;
             this.dataset.VCUResample({'SteeringAngle'});
-            import IMUFilter.*
-            this.filter = IMUFilter();
+            import SwissFilter.*
+            this.filter = SwissFilter();
         end
         
         function steeringAngle = get(this)

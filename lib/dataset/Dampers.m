@@ -44,8 +44,8 @@ classdef Dampers < handle
                 this.rearRight = this.dataset.getOriginalData().DamperRRmm;
                 this.calibrate();
             end
-            import IMUFilter.*
-            this.filter = IMUFilter();
+            import SwissFilter.*
+            this.filter = SwissFilter();
             this.filter.setType('Median');
         end
         

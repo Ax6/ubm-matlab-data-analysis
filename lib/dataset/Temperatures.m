@@ -15,8 +15,8 @@ classdef Temperatures < handle
     methods
         function this = Temperatures(dataset)
             this.dataset = dataset;
-            import IMUFilter.*
-            this.filter = IMUFilter();
+            import SwissFilter.*
+            this.filter = SwissFilter();
         end
         
         function temp = getScamb1(this)

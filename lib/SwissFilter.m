@@ -4,7 +4,7 @@
 % fltType: (Default = Sgolay)
 %   "Sgolay" | "LMS" | "MA" | "Median" | "LowPass"
 % '.get()' returns filtered data with the choosen fltType
-classdef IMUFilter < handle
+classdef SwissFilter < handle
     properties
         originalData;
         dataSize;
@@ -27,7 +27,7 @@ classdef IMUFilter < handle
     end
     methods (Access = public)
         %Constructor
-        function this = IMUFilter(originalData)
+        function this = SwissFilter(originalData)
            if exist('originalData', 'var')
                this.setData(originalData);
            end

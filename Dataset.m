@@ -32,7 +32,7 @@ classdef Dataset < handle
     methods (Access = public)
         function this = Dataset(originalData, vcu_ecu_sync_enable)
             %DATASET Construct an instance of this class
-            import IMUFilter.*
+            import SwissFilter.*
             this.originalData = originalData;
             if exist('vcu_ecu_sync_enable', 'var')
                 this.VCU_ECU_SYNC_ENABLED = vcu_ecu_sync_enable;
@@ -43,7 +43,7 @@ classdef Dataset < handle
             this.tStart = 0;
             this.tEnd = this.getDuration();
             this.generate();
-            this.filter = IMUFilter();
+            this.filter = SwissFilter();
             import Speed.*
             this.speed = Speed(this);
             import Dampers.*

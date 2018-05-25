@@ -16,8 +16,8 @@ classdef RideHeight < handle
     methods (Access = public)
         function this = RideHeight(dataset)
             %HEIGHT Construct an instance of this class
-            import IMUFilter.*
-            this.filter = IMUFilter();
+            import SwissFilter.*
+            this.filter = SwissFilter();
             this.filter.setType(this.DEFAULT_FILTER);
             this.filter.MEDIAN_WINDOW = this.MEDIAN_WINDOW;
             this.dataset = dataset;

@@ -18,8 +18,8 @@ classdef Speed < handle
     methods (Access = public)
         function this = Speed(dataset)
             %SPEED Construct an instance of this class
-            import IMUFilter.*
-            this.filter = IMUFilter();
+            import SwissFilter.*
+            this.filter = SwissFilter();
             this.filter.setType('Median');
             this.filter.MEDIAN_WINDOW = 11;
             

@@ -16,9 +16,9 @@ classdef Gyroscope < handle
     methods (Access = public)
         function this = Gyroscope(dataset)
             %GYROSCOPE Construct an instance of this class
-            import IMUFilter.*
+            import SwissFilter.*
             this.dataset = dataset;
-            this.filter = IMUFilter();
+            this.filter = SwissFilter();
             this.filter.setType('Median');
             if(ismember('GyroXrad', this.dataset.getData().Properties.VariableNames))
                 this.X = this.dataset.getData().GyroXrad;

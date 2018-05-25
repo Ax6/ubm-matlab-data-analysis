@@ -17,10 +17,10 @@ classdef InstantFinder < handle
     
     methods (Access = public)
         function this = InstantFinder(dataset)
-            import IMUFilter.*
+            import SwissFilter.*
             this.dataset = dataset;
             this.F_SAMPLING = dataset.getSamplingFrequency();
-            this.filter = IMUFilter();
+            this.filter = SwissFilter();
         end
         
         function start = getStart(this)
