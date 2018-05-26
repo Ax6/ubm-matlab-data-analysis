@@ -6,7 +6,8 @@ classdef LogsManager < handle
         fileCount
         randomExtractedIndex = 1;
         randomExtracted;
-        selectedLogs = struct('dates',{{}},'locations',{{}},'specialities',{{}},'drivers',{{}},'attempts',{{}});
+        selectedLogs = struct('dates',{{}},'locations',{{}}, ...
+            'specialities',{{}},'drivers',{{}},'attempts',{{}});
         selectedVariables = {};
     end
 
@@ -33,6 +34,11 @@ classdef LogsManager < handle
             this.fileList = dir(strcat(directory, this.LOG_NAME_SEARCH));
             this.fileCount = length(this.fileList);
             this.generateRandomFileExtraction();
+        end
+        
+        function this = resetSelectors(this)
+           this.selectedLogs = struct('dates',{{}},'locations',{{}}, ...
+               'specialities',{{}},'drivers',{{}},'attempts',{{}}); 
         end
 
         function this = setDates(this, dates)

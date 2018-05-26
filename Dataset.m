@@ -26,7 +26,7 @@ classdef Dataset < handle
         ECULength;
         VCUCoeff;
         ECUCoeff;
-        VCUTurnOnOffset = 1;
+        VCUTurnOnOffset = 11; %samples
     end
     
     methods (Access = public)
@@ -52,12 +52,24 @@ classdef Dataset < handle
         function this = ECUVCUSyinc(this)
             if this.canSyncECUVCU()
                 this.genECUVCUSyncCoefficents();
-                if ismember('ClutchPosPneum', this.originalData.Properties.VariableNames)
-                    this.VCUResample({'ClutchPosPneum'});
-                end
+                %if ismember('ClutchPosPneum', this.originalData.Properties.VariableNames)
+                %    this.VCUResample({'ClutchPosPneum'});
+                %end
                 if ismember('Gear', this.originalData.Properties.VariableNames)
                     this.VCUResample({'Gear'});
                     this.originalData.Gear = round(this.originalData.Gear);
+                end
+                if ismember('GearUP', this.originalData.Properties.VariableNames)
+                    this.VCUResample({'GearUP'});
+                    this.originalData.GearUP = round(this.originalData.GearUP);
+                end
+                if ismember('GearDOWN', this.originalData.Properties.VariableNames)
+                    this.VCUResample({'GearDOWN'});
+                    this.originalData.GearDOWN = round(this.originalData.GearDOWN);
+                end
+                if ismember('GPSWITCH', this.originalData.Properties.VariableNames)
+                    this.VCUResample({'GPSWITCH'});
+                    this.originalData.GPSWITCH = round(this.originalData.GPSWITCH);
                 end
                 this.VCU_ECU_SYNCED = true;
             end
